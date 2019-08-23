@@ -26,4 +26,3 @@ export default class ViewSourceButton extends Plugin {
 		} );
 	}
 }
-q

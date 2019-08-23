@@ -8,12 +8,6 @@ export default class ViewSourceButton extends Plugin {
 	init() {
 		const editor = this.editor;
 
-		const handler = editor.config.get( 'sourceCode.handler' );
-
-		console.log('editor.config', editor.config);
-
-		console.log('handler', handler);
-
 		editor.ui.componentFactory.add( 'source-button', locale => {
 			const view = new ButtonView( locale );
 
@@ -26,10 +20,11 @@ export default class ViewSourceButton extends Plugin {
 			// Callback executed once the image is clicked.
 			view.on( 'execute', () => {
 
-				console.log('IT WORKS', editor && editor.config);
-				if (editor && editor.config && editor.config.sourceCode && typeof editor.config.sourceCode.handler === 'function') {
-					editor.config.sourceCode.handler();
-				}
+				const handler = editor.config.get( 'sourceCode' ).handler;
+				console.log('execute', handler);
+
+				handler();
+
 
 			} );
 

@@ -25,8 +25,12 @@ export default class ViewSourceButton extends Plugin {
 
 			// Callback executed once the image is clicked.
 			view.on( 'execute', () => {
-				console.log('IT WORKS');
-				// handler();
+
+				console.log('IT WORKS', editor && editor.config);
+				if (editor && editor.config && editor.config.sourceCode && typeof editor.config.sourceCode.handler === 'function') {
+					editor.config.sourceCode.handler();
+				}
+
 			} );
 
 			return view;

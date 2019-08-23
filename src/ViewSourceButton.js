@@ -2,6 +2,7 @@ import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 
 import imageIcon from '@ckeditor/ckeditor5-core/theme/icons/image.svg';
 
+import * as codeIcon from './code-solid.svg'
 import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 export default class ViewSourceButton extends Plugin {
@@ -12,8 +13,8 @@ export default class ViewSourceButton extends Plugin {
 			const view = new ButtonView( locale );
 
 			view.set( {
-				label: 'View source',
-				icon: imageIcon,
+				label: 'Source Code',
+				icon: codeIcon,
 				tooltip: true
 			} );
 

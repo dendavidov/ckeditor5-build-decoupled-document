@@ -73,7 +73,6 @@ DecoupledEditor.builtinPlugins = [
 DecoupledEditor.defaultConfig = {
 	toolbar: {
 		items: [
-			'source-button',
 			'heading',
 			'|',
 			'fontsize',
@@ -97,7 +96,9 @@ DecoupledEditor.defaultConfig = {
 			'mediaEmbed',
 			'|',
 			'undo',
-			'redo'
+			'redo',
+			'|',
+			'source-button',
 		]
 	},
 	image: {

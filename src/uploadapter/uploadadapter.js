@@ -26,16 +26,16 @@ import { getCsrfToken } from './utils';
  * @extends module:core/plugin~Plugin
  */
 export default class CKFinderUploadAdapter extends Plugin {
-	/**
-	 * @inheritDoc
-	 */
-	static get requires() {
-		return [ FileRepository ];
-	}
+    /**
+     * @inheritDoc
+     */
+    static get requires() {
+        return [FileRepository];
+    }
 
-	/**
+    /**
 	 * @inheritDoc
-	 */
+	 *
 	static get pluginName() {
 		return 'CKFinderUploadAdapterNew';
 	}
@@ -43,28 +43,43 @@ export default class CKFinderUploadAdapter extends Plugin {
 	/**
 	 * @inheritDoc
 	 */
-	init() {
-		const uploadUrl = this.editor.config.get( 'ckfinder.uploadUrl' );
-		const headers = this.editor.config.get( 'ckfinder.headers' );
-		const downloadUrl = this.editor.config.get( 'ckfinder.downloadUrl' );
-		const onError = this.editor.config.get( 'ckfinder.onError' );
-		const onStart = this.editor.config.get( 'ckfinder.onStart' );
-		const onSuccess = this.editor.config.get( 'ckfinder.onSuccess' );
+    init() {
+        const {
+            uploadUrl,
+            getHeaders,
+            downloadUrl,
+            onError,
+            onStart,
+            onSuccess,
+        } = this.editor.config.get('ckfinder');
 
-		if ( !uploadUrl ) {
-			return;
-		}
+        if (!uploadUrl) {
+            return;
+        }
 
-		// Register CKFinderAdapter
-		this.editor.plugins.get( FileRepository ).createUploadAdapter = loader => new UploadAdapter( {
-			loader, uploadUrl, t: this.editor.t, headers, downloadUrl, onError, onStart, onSuccess
-		} );
-	}
+        // Register CKFinderAdapter
+        this.editor.plugins.get(FileRepository).createUploadAdapter = loader =>
+            new UploadAdapter({
+                loader,
+                uploadUrl,
+                t: this.editor.t,
+                getHeaders,
+                downloadUrl,
+                onError,
+                onStart,
+                onSuccess,
+            });
+    }
 }
 
-function hashCode( str ) {
-	return str.split('').reduce((prevHash, currVal) =>
-		(((prevHash << 5) - prevHash) + currVal.charCodeAt(0))|0, 0);
+function hashCode(str) {
+    return str
+        .split('')
+        .reduce(
+            (prevHash, currVal) =>
+                ((prevHash << 5) - prevHash + currVal.charCodeAt(0)) | 0,
+            0,
+        );
 }
 
 /**
@@ -74,162 +89,165 @@ function hashCode( str ) {
  * @implements module:upload/filerepository~UploadAdapter
  */
 class UploadAdapter {
-	/**
-	 * Creates a new adapter instance.
-	 *
-	 * @param {module:upload/filerepository~FileLoader} loader
-	 * @param {String} url
-	 * @param {module:utils/locale~Locale#t} t
-	 */
-	constructor( {loader, downloadUrl, uploadUrl, t, headers, onError, onStart, onSuccess } ) {
-		/**
-		 * FileLoader instance to use during the upload.
-		 *
-		 * @member {module:upload/filerepository~FileLoader} #loader
-		 */
-		this.loader = loader;
+    /**
+     * Creates a new adapter instance.
+     *
+     * @param {module:upload/filerepository~FileLoader} loader
+     * @param {String} url
+     * @param {module:utils/locale~Locale#t} t
+     */
+    constructor({
+        loader,
+        downloadUrl,
+        uploadUrl,
+        t,
+        getHeaders,
+        onError,
+        onStart,
+        onSuccess,
+    }) {
+        /**
+         * FileLoader instance to use during the upload.
+         *
+         * @member {module:upload/filerepository~FileLoader} #loader
+         */
+        this.loader = loader;
 
-		/**
-		 * Upload URL.
-		 *
-		 * @member {String} #url
-		 */
-		this.url = null;
-		this.downloadUrl = downloadUrl;
-		this.uploadUrl = uploadUrl;
+        /**
+         * Upload URL.
+         *
+         * @member {String} #url
+         */
+        this.url = null;
+        this.downloadUrl = downloadUrl;
+        this.uploadUrl = uploadUrl;
 
-		/**
-		 * Locale translation method.
-		 *
-		 * @member {module:utils/locale~Locale#t} #t
-		 */
-		this.t = t;
-		this.headers = headers;
-		this.onError = onError;
-		this.onStart = onStart;
-		this.onSuccess = onSuccess;
-	}
+        /**
+         * Locale translation method.
+         *
+         * @member {module:utils/locale~Locale#t} #t
+         */
+        this.t = t;
+        this.getHeaders = getHeaders;
+        this.onError = onError;
+        this.onStart = onStart;
+        this.onSuccess = onSuccess;
+    }
 
-	/**
-	 * Starts the upload process.
-	 *
-	 * @see module:upload/filerepository~UploadAdapter#upload
-	 * @returns {Promise.<Object>}
-	 */
-	upload() {
+    /**
+     * Starts the upload process.
+     *
+     * @see module:upload/filerepository~UploadAdapter#upload
+     * @returns {Promise.<Object>}
+     */
+    upload() {
+        return this.loader.file.then(file => {
+            const { name, size, lastModified, type } = file;
 
+            const key = `${hashCode(
+                [name, size, lastModified, type].join('-'),
+            )}-${name}`;
 
-		return this.loader.file.then( file => {
-			const { name, size, lastModified, type} = file;
+            // eslint-disable-next-line no-undef
+            return fetch(this.uploadUrl, {
+                body: JSON.stringify({ key }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...this.getHeaders(),
+                },
+                method: 'POST',
+            })
+                .then(res => res.json())
+                .then(data => {
+                    // eslint-disable-next-line no-undef
+                    return fetch(data.data, {
+                        method: 'PUT',
+                        body: file,
+                    });
+                })
+                .then(() => {
+                    return { default: `${this.downloadUrl}/${key}` };
+                });
+        });
+    }
 
-			const key = `${hashCode([name, size, lastModified, type].join('-'))}-${name}`;
+    /**
+     * Aborts the upload process.
+     *
+     * @see module:upload/filerepository~UploadAdapter#abort
+     */
+    abort() {
+        if (this.xhr) {
+            this.xhr.abort();
+        }
+    }
 
-			return fetch(
-				this.uploadUrl,
-				{
-					body: JSON.stringify({ key }),
-					headers: {
-						'Content-Type': 'application/json',
-						...this.headers,
-					},
-					method: 'POST',
-				}
-			)
-				.then( res => res.json() )
-				.then( data => {
-					return fetch(data.data, {
-						method: 'PUT',
-						body: file,
-					});
-				} )
-				.then( () => {
-					return { default: `${this.downloadUrl}/${key}`}
+    /**
+     * Initializes the XMLHttpRequest object.
+     *
+     * @private
+     */
+    _initRequest() {
+        const xhr = (this.xhr = new XMLHttpRequest());
 
+        xhr.open('PUT', this.url, true);
 
-					} )
+        xhr.responseType = 'json';
+    }
 
+    /**
+     * Initializes XMLHttpRequest listeners.
+     *
+     * @private
+     * @param {Function} resolve Callback function to be called when the request is successful.
+     * @param {Function} reject Callback function to be called when the request cannot be completed.
+     * @param {File} file File instance to be uploaded.
+     */
+    _initListeners(resolve, reject, file, key) {
+        const xhr = this.xhr;
+        const loader = this.loader;
+        const t = this.t;
+        const genericError = t('Cannot upload file:') + ` ${file.name}.`;
 
+        xhr.addEventListener('error', () => reject(genericError));
+        xhr.addEventListener('abort', () => reject());
+        xhr.addEventListener('load', () => {
+            const status = xhr.status;
 
-		} );
-	}
+            if (status !== 200) {
+                return reject(genericError);
+            }
 
-	/**
-	 * Aborts the upload process.
-	 *
-	 * @see module:upload/filerepository~UploadAdapter#abort
-	 */
-	abort() {
-		if ( this.xhr ) {
-			this.xhr.abort();
-		}
-	}
+            resolve({
+                default: `${this.downloadUrl}/${key}`,
+            });
+        });
 
-	/**
-	 * Initializes the XMLHttpRequest object.
-	 *
-	 * @private
-	 */
-	_initRequest() {
-		const xhr = this.xhr = new XMLHttpRequest();
+        // Upload progress when it's supported.
+        /* istanbul ignore else */
+        if (xhr.upload) {
+            xhr.upload.addEventListener('progress', evt => {
+                if (evt.lengthComputable) {
+                    loader.uploadTotal = evt.total;
+                    loader.uploaded = evt.loaded;
+                }
+            });
+        }
+    }
 
-		xhr.open( 'PUT', this.url, true );
+    /**
+     * Prepares the data and sends the request.
+     *
+     * @private
+     * @param {File} file File instance to be uploaded.
+     */
+    _sendRequest(file) {
+        // Prepare form data.
+        const data = new FormData();
+        data.append('upload', file);
+        data.append('ckCsrfToken', getCsrfToken());
 
-		xhr.responseType = 'json';
-	}
-
-	/**
-	 * Initializes XMLHttpRequest listeners.
-	 *
-	 * @private
-	 * @param {Function} resolve Callback function to be called when the request is successful.
-	 * @param {Function} reject Callback function to be called when the request cannot be completed.
-	 * @param {File} file File instance to be uploaded.
-	 */
-	_initListeners( resolve, reject, file, key ) {
-		const xhr = this.xhr;
-		const loader = this.loader;
-		const t = this.t;
-		const genericError = t( 'Cannot upload file:' ) + ` ${ file.name }.`;
-
-		xhr.addEventListener( 'error', () => reject( genericError ) );
-		xhr.addEventListener( 'abort', () => reject() );
-		xhr.addEventListener( 'load', () => {
-			const status = xhr.status;
-
-			if ( status !== 200 ) {
-				return reject( genericError );
-			}
-
-			resolve( {
-				default: `${ this.downloadUrl }/${ key }`
-			} );
-		} );
-
-		// Upload progress when it's supported.
-		/* istanbul ignore else */
-		if ( xhr.upload ) {
-			xhr.upload.addEventListener( 'progress', evt => {
-				if ( evt.lengthComputable ) {
-					loader.uploadTotal = evt.total;
-					loader.uploaded = evt.loaded;
-				}
-			} );
-		}
-	}
-
-	/**
-	 * Prepares the data and sends the request.
-	 *
-	 * @private
-	 * @param {File} file File instance to be uploaded.
-	 */
-	_sendRequest( file ) {
-		// Prepare form data.
-		const data = new FormData();
-		data.append( 'upload', file );
-		data.append( 'ckCsrfToken', getCsrfToken() );
-
-		// Send request.
-		this.xhr.send( data );
-	}
+        // Send request.
+        this.xhr.send(data);
+    }
 }

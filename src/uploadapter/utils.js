@@ -21,14 +21,14 @@ const tokenCharset = 'abcdefghijklmnopqrstuvwxyz0123456789';
  * @returns {String}
  */
 export function getCsrfToken() {
-	let token = getCookie( TOKEN_COOKIE_NAME );
+    let token = getCookie(TOKEN_COOKIE_NAME);
 
-	if ( !token || token.length != TOKEN_LENGTH ) {
-		token = generateToken( TOKEN_LENGTH );
-		setCookie( TOKEN_COOKIE_NAME, token );
-	}
+    if (!token || token.length != TOKEN_LENGTH) {
+        token = generateToken(TOKEN_LENGTH);
+        setCookie(TOKEN_COOKIE_NAME, token);
+    }
 
-	return token;
+    return token;
 }
 
 /**
@@ -37,20 +37,20 @@ export function getCsrfToken() {
  * @param {String} name
  * @returns {String|null}
  */
-export function getCookie( name ) {
-	name = name.toLowerCase();
-	const parts = document.cookie.split( ';' );
+export function getCookie(name) {
+    name = name.toLowerCase();
+    const parts = document.cookie.split(';');
 
-	for ( const part of parts ) {
-		const pair = part.split( '=' );
-		const key = decodeURIComponent( pair[ 0 ].trim().toLowerCase() );
+    for (const part of parts) {
+        const pair = part.split('=');
+        const key = decodeURIComponent(pair[0].trim().toLowerCase());
 
-		if ( key === name ) {
-			return decodeURIComponent( pair[ 1 ] );
-		}
-	}
+        if (key === name) {
+            return decodeURIComponent(pair[1]);
+        }
+    }
 
-	return null;
+    return null;
 }
 
 /**
@@ -59,8 +59,9 @@ export function getCookie( name ) {
  * @param {String} name
  * @param {String} value
  */
-export function setCookie( name, value ) {
-	document.cookie = encodeURIComponent( name ) + '=' + encodeURIComponent( value ) + ';path=/';
+export function setCookie(name, value) {
+    document.cookie =
+        encodeURIComponent(name) + '=' + encodeURIComponent(value) + ';path=/';
 }
 
 // Generates the CSRF token with the given length.
@@ -68,16 +69,18 @@ export function setCookie( name, value ) {
 // @private
 // @param {Number} length
 // @returns {string}
-function generateToken( length ) {
-	let result = '';
-	const randValues = new Uint8Array( length );
+function generateToken(length) {
+    let result = '';
+    const randValues = new Uint8Array(length);
 
-	window.crypto.getRandomValues( randValues );
+    window.crypto.getRandomValues(randValues);
 
-	for ( let j = 0; j < randValues.length; j++ ) {
-		const character = tokenCharset.charAt( randValues[ j ] % tokenCharset.length );
-		result += Math.random() > 0.5 ? character.toUpperCase() : character;
-	}
+    for (let j = 0; j < randValues.length; j++) {
+        const character = tokenCharset.charAt(
+            randValues[j] % tokenCharset.length,
+        );
+        result += Math.random() > 0.5 ? character.toUpperCase() : character;
+    }
 
-	return result;
+    return result;
 }

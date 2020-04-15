@@ -32,19 +32,19 @@ import CKFinderUploadAdapter from '../../uploadapter/uploadadapter';
  * @extends module:core/plugin~Plugin
  */
 export default class CKFinder extends Plugin {
-	/**
-	 * @inheritDoc
-	 */
-	static get pluginName() {
-		return 'CKFinderNew';
-	}
+    /**
+     * @inheritDoc
+     */
+    static get pluginName() {
+        return 'CKFinderNew';
+    }
 
-	/**
-	 * @inheritDoc
-	 */
-	static get requires() {
-		return [ CKFinderEditing, CKFinderUI, CKFinderUploadAdapter ];
-	}
+    /**
+     * @inheritDoc
+     */
+    static get requires() {
+        return [CKFinderEditing, CKFinderUI, CKFinderUploadAdapter];
+    }
 }
 
 /**

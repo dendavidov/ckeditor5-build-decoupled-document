@@ -47,119 +47,109 @@ export default class DecoupledEditor extends DecoupledEditorBase {}
 
 // Plugins to include in the build.
 DecoupledEditor.builtinPlugins = [
-	Essentials,
-	Alignment,
-	FontSize,
-	FontFamily,
-	FontColor,
-	FontBackgroundColor,
-	Highlight,
-	UploadAdapter,
-	Autoformat,
-	Bold,
-	Italic,
-	Strikethrough,
-	Underline,
-	BlockQuote,
-	CKFinder,
-	EasyImage,
-	Heading,
-	Image,
-	ImageCaption,
-	ImageStyle,
-	ImageToolbar,
-	ImageUpload,
-	ImageResize,
-	Link,
-	List,
-	MediaEmbed,
-	Paragraph,
-	PasteFromOffice,
-	Table,
-	TableToolbar,
-	VideoUploadButton,
-	ViewSourceButton,
-	VideoResize
+    Essentials,
+    Alignment,
+    FontSize,
+    FontFamily,
+    FontColor,
+    FontBackgroundColor,
+    Highlight,
+    UploadAdapter,
+    Autoformat,
+    Bold,
+    Italic,
+    Strikethrough,
+    Underline,
+    BlockQuote,
+    CKFinder,
+    EasyImage,
+    Heading,
+    Image,
+    ImageCaption,
+    ImageStyle,
+    ImageToolbar,
+    ImageUpload,
+    ImageResize,
+    Link,
+    List,
+    MediaEmbed,
+    Paragraph,
+    PasteFromOffice,
+    Table,
+    TableToolbar,
+    VideoUploadButton,
+    ViewSourceButton,
+    VideoResize,
 ];
 
 // Editor configuration.
 DecoupledEditor.defaultConfig = {
-	toolbar: {
-		items: [
-			'heading',
-			'|',
-			'fontsize',
-			'fontfamily',
-			'|',
-			'bold',
-			'italic',
-			'underline',
-			'strikethrough',
-			'fontColor',
-			'fontBackgroundColor',
-			'|',
-			'alignment',
-			'|',
-			'numberedList',
-			'bulletedList',
-			'|',
-			'link',
-			'blockquote',
-			'video-upload',
-			'imageUpload',
-			'insertTable',
-			'mediaEmbed',
-			'|',
-			'undo',
-			'redo',
-			'|',
-			'source-button',
-		]
-	},
-	image: {
-		styles: [
-			'full',
-			'side',
-			'alignLeft',
-			'alignCenter',
-			'alignRight'
-		],
-		resizeUnit: 'px',
-		toolbar: [
-			'imageStyle:alignLeft',
-			'imageStyle:full',
-			'imageStyle:alignRight',
-			'|',
-			'imageTextAlternative'
-		]
-	},
-	table: {
-		contentToolbar: [
-			'tableColumn',
-			'tableRow',
-			'mergeTableCells'
-		]
-	},
-	link: {
-		decorators: {
-			addTargetToLinks: {
-				mode: 'manual',
-				label: 'Open in a new tab',
-				attributes: {
-					target: '_blank',
-					rel: 'noopener noreferrer'
-				}
-			}
-		}
-	},
-	fontColor: {
-		colors: colorsSettings,
-		columns: 17,
-	},
-	fontBackgroundColor: {
-		colors: colorsSettings,
-		columns: 17,
-	},
-	// This value must be kept in sync with the language defined in webpack.config.js.
-	language: 'en'
+    toolbar: {
+        items: [
+            'heading',
+            '|',
+            'fontsize',
+            'fontfamily',
+            '|',
+            'bold',
+            'italic',
+            'underline',
+            'strikethrough',
+            'fontColor',
+            'fontBackgroundColor',
+            '|',
+            'alignment',
+            '|',
+            'numberedList',
+            'bulletedList',
+            '|',
+            'link',
+            'blockquote',
+            'video-upload',
+            'imageUpload',
+            'insertTable',
+            'mediaEmbed',
+            '|',
+            'undo',
+            'redo',
+            '|',
+            'source-button',
+        ],
+    },
+    image: {
+        styles: ['full', 'side', 'alignLeft', 'alignCenter', 'alignRight'],
+        resizeUnit: 'px',
+        toolbar: [
+            'imageStyle:alignLeft',
+            'imageStyle:full',
+            'imageStyle:alignRight',
+            '|',
+            'imageTextAlternative',
+        ],
+    },
+    table: {
+        contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells'],
+    },
+    link: {
+        decorators: {
+            addTargetToLinks: {
+                mode: 'manual',
+                label: 'Open in a new tab',
+                attributes: {
+                    target: '_blank',
+                    rel: 'noopener noreferrer',
+                },
+            },
+        },
+    },
+    fontColor: {
+        colors: colorsSettings,
+        columns: 17,
+    },
+    fontBackgroundColor: {
+        colors: colorsSettings,
+        columns: 17,
+    },
+    // This value must be kept in sync with the language defined in webpack.config.js.
+    language: 'en',
 };

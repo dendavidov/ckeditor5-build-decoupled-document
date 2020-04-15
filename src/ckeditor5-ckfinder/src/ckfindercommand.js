@@ -21,123 +21,145 @@ import CKEditorError from '@ckeditor/ckeditor5-utils/src/ckeditorerror';
  * @extends module:core/command~Command
  */
 export default class CKFinderCommand extends Command {
-	/**
-	 * @inheritDoc
-	 */
-	constructor( editor ) {
-		super( editor );
+    /**
+     * @inheritDoc
+     */
+    constructor(editor) {
+        super(editor);
 
-		// Remove default document listener to lower its priority.
-		this.stopListening( this.editor.model.document, 'change' );
+        // Remove default document listener to lower its priority.
+        this.stopListening(this.editor.model.document, 'change');
 
-		// Lower this command listener priority to be sure that refresh() will be called after link & image refresh.
-		this.listenTo( this.editor.model.document, 'change', () => this.refresh(), { priority: 'low' } );
-	}
+        // Lower this command listener priority to be sure that refresh() will be called after link & image refresh.
+        this.listenTo(
+            this.editor.model.document,
+            'change',
+            () => this.refresh(),
+            { priority: 'low' },
+        );
+    }
 
-	/**
-	 * @inheritDoc
-	 */
-	refresh() {
-		const imageCommand = this.editor.commands.get( 'imageUpload' );
-		const linkCommand = this.editor.commands.get( 'link' );
+    /**
+     * @inheritDoc
+     */
+    refresh() {
+        const imageCommand = this.editor.commands.get('imageUpload');
+        const linkCommand = this.editor.commands.get('link');
 
-		// The CKFinder command is enabled when one of image or link command is enabled.
-		this.isEnabled = imageCommand && linkCommand && ( imageCommand.isEnabled || linkCommand.isEnabled );
-	}
+        // The CKFinder command is enabled when one of image or link command is enabled.
+        this.isEnabled =
+            imageCommand &&
+            linkCommand &&
+            (imageCommand.isEnabled || linkCommand.isEnabled);
+    }
 
-	/**
-	 * @inheritDoc
-	 */
-	execute() {
-		const editor = this.editor;
+    /**
+     * @inheritDoc
+     */
+    execute() {
+        const editor = this.editor;
 
-		const openerMethod = this.editor.config.get( 'ckfinder.openerMethod' ) || 'modal';
+        const openerMethod =
+            this.editor.config.get('ckfinder.openerMethod') || 'modal';
 
-		if ( openerMethod != 'popup' && openerMethod != 'modal' ) {
-			throw new CKEditorError( 'ckfinder-unknown-openerMethod: The openerMethod config option must by "popup" or "modal".', editor );
-		}
+        if (openerMethod != 'popup' && openerMethod != 'modal') {
+            throw new CKEditorError(
+                'ckfinder-unknown-openerMethod: The openerMethod config option must by "popup" or "modal".',
+                editor,
+            );
+        }
 
-		const options = this.editor.config.get( 'ckfinder.options' ) || {};
+        const options = this.editor.config.get('ckfinder.options') || {};
 
-		options.chooseFiles = true;
+        options.chooseFiles = true;
 
-		// Cache the user-defined onInit method
-		const originalOnInit = options.onInit;
+        // Cache the user-defined onInit method
+        const originalOnInit = options.onInit;
 
-		// Pass the lang code to the CKFinder if not defined by user.
-		if ( !options.language ) {
-			options.language = editor.locale.language;
-		}
+        // Pass the lang code to the CKFinder if not defined by user.
+        if (!options.language) {
+            options.language = editor.locale.language;
+        }
 
-		// The onInit method allows to extend CKFinder's behavior. It is used to attach event listeners to file choosing related events.
-		options.onInit = finder => {
-			// Call original options.onInit if it was defined by user.
-			if ( originalOnInit ) {
-				originalOnInit();
-			}
+        // The onInit method allows to extend CKFinder's behavior. It is used to attach event listeners to file choosing related events.
+        options.onInit = finder => {
+            // Call original options.onInit if it was defined by user.
+            if (originalOnInit) {
+                originalOnInit();
+            }
 
-			finder.on( 'files:choose', evt => {
-				const files = evt.data.files.toArray();
+            finder.on('files:choose', evt => {
+                const files = evt.data.files.toArray();
 
-				// Insert links
-				const links = files.filter( file => !file.isImage() );
-				const images = files.filter( file => file.isImage() );
+                // Insert links
+                const links = files.filter(file => !file.isImage());
+                const images = files.filter(file => file.isImage());
 
-				for ( const linkFile of links ) {
-					editor.execute( 'link', linkFile.getUrl() );
-				}
+                for (const linkFile of links) {
+                    editor.execute('link', linkFile.getUrl());
+                }
 
-				const imagesUrls = [];
+                const imagesUrls = [];
 
-				for ( const image of images ) {
-					const url = image.getUrl();
+                for (const image of images) {
+                    const url = image.getUrl();
+                    const proxyUrl = finder.request('file:getProxyUrl', {
+                        file: image,
+                    });
+                    const imageUrl = url || proxyUrl;
 
-					imagesUrls.push( url ? url : finder.request( 'file:getProxyUrl', { file: image } ) );
-				}
+                    imagesUrls.push(imageUrl);
+                }
 
-				if ( imagesUrls.length ) {
-					insertImages( editor, imagesUrls );
-				}
-			} );
+                if (imagesUrls.length) {
+                    insertImages(editor, imagesUrls);
+                }
+            });
 
-			finder.on( 'file:choose:resizedImage', evt => {
-				const resizedUrl = evt.data.resizedUrl;
+            finder.on('file:choose:resizedImage', evt => {
+                const resizedUrl = evt.data.resizedUrl;
 
-				if ( !resizedUrl ) {
-					const notification = editor.plugins.get( 'Notification' );
-					const t = editor.locale.t;
+                if (!resizedUrl) {
+                    const notification = editor.plugins.get('Notification');
+                    const t = editor.locale.t;
 
-					notification.showWarning( t( 'Could not obtain resized image URL.' ), {
-						title: t( 'Selecting resized image failed' ),
-						namespace: 'ckfinder'
-					} );
+                    notification.showWarning(
+                        t('Could not obtain resized image URL.'),
+                        {
+                            title: t('Selecting resized image failed'),
+                            namespace: 'ckfinder',
+                        },
+                    );
 
-					return;
-				}
+                    return;
+                }
 
-				insertImages( editor, [ resizedUrl ] );
-			} );
-		};
+                insertImages(editor, [resizedUrl]);
+            });
+        };
 
-		window.CKFinder[ openerMethod ]( options );
-	}
+        window.CKFinder[openerMethod](options);
+    }
 }
 
-function insertImages( editor, urls ) {
-	const imageCommand = editor.commands.get( 'imageUpload' );
+function insertImages(editor, urls) {
+    const imageCommand = editor.commands.get('imageUpload');
 
-	// Check if inserting an image is actually possible - it might be possible to only insert a link.
-	if ( !imageCommand.isEnabled ) {
-		const notification = editor.plugins.get( 'Notification' );
-		const t = editor.locale.t;
+    // Check if inserting an image is actually possible - it might be possible to only insert a link.
+    if (!imageCommand.isEnabled) {
+        const notification = editor.plugins.get('Notification');
+        const t = editor.locale.t;
 
-		notification.showWarning( t( 'Could not insert image at the current position.' ), {
-			title: t( 'Inserting image failed' ),
-			namespace: 'ckfinder'
-		} );
+        notification.showWarning(
+            t('Could not insert image at the current position.'),
+            {
+                title: t('Inserting image failed'),
+                namespace: 'ckfinder',
+            },
+        );
 
-		return;
-	}
+        return;
+    }
 
-	editor.execute( 'imageInsert', { source: urls } );
+    editor.execute('imageInsert', { source: urls });
 }

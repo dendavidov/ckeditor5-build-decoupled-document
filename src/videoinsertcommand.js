@@ -33,44 +33,48 @@ import { findOptimalInsertionPosition } from '@ckeditor/ckeditor5-widget/src/uti
  * @extends module:core/command~Command
  */
 
+export function insertVideo(writer, model, attributes = {}) {
+    const videoElement = writer.createElement('video', attributes);
 
-export function insertVideo( writer, model, attributes = {} ) {
-	const videoElement = writer.createElement( 'video', attributes );
+    const insertAtSelection = findOptimalInsertionPosition(
+        model.document.selection,
+        model,
+    );
 
-	const insertAtSelection = findOptimalInsertionPosition( model.document.selection, model );
+    model.insertContent(videoElement, insertAtSelection);
 
-	model.insertContent( videoElement, insertAtSelection );
-
-	// Inserting an image might've failed due to schema regulations.
-	if ( videoElement.parent ) {
-		writer.setSelection( videoElement, 'on' );
-	}
+    // Inserting an image might've failed due to schema regulations.
+    if (videoElement.parent) {
+        writer.setSelection(videoElement, 'on');
+    }
 }
 
 export default class VideoInsertCommand extends Command {
-	/**
-	 * @inheritDoc
-	 */
-	refresh() {
-		this.isEnabled = true;
-	}
+    /**
+     * @inheritDoc
+     */
+    refresh() {
+        this.isEnabled = true;
+    }
 
-	/**
-	 * Executes the command.
-	 *
-	 * @fires execute
-	 * @param {Object} options Options for the executed command.
-	 * @param {String|Array.<String>} options.source The image source or an array of image sources to insert.
-	 */
-	execute( options ) {
-		const model = this.editor.model;
+    /**
+     * Executes the command.
+     *
+     * @fires execute
+     * @param {Object} options Options for the executed command.
+     * @param {String|Array.<String>} options.source The image source or an array of image sources to insert.
+     */
+    execute(options) {
+        const model = this.editor.model;
 
-		model.change( writer => {
-			const sources = Array.isArray( options.source ) ? options.source : [ options.source ];
+        model.change(writer => {
+            const sources = Array.isArray(options.source)
+                ? options.source
+                : [options.source];
 
-			for ( const src of sources ) {
-				insertVideo( writer, model, { src, controls: true } );
-			}
-		} );
-	}
+            for (const src of sources) {
+                insertVideo(writer, model, { src, controls: true });
+            }
+        });
+    }
 }

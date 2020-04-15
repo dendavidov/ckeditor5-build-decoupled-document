@@ -18,40 +18,40 @@ import browseFilesIcon from '../theme/icons/browse-files.svg';
  * @extends module:core/plugin~Plugin
  */
 export default class CKFinderUI extends Plugin {
-	/**
-	 * @inheritDoc
-	 */
-	static get pluginName() {
-		return 'CKFinderUI';
-	}
+    /**
+     * @inheritDoc
+     */
+    static get pluginName() {
+        return 'CKFinderUI';
+    }
 
-	/**
-	 * @inheritDoc
-	 */
-	init() {
-		const editor = this.editor;
-		const componentFactory = editor.ui.componentFactory;
-		const t = editor.t;
+    /**
+     * @inheritDoc
+     */
+    init() {
+        const editor = this.editor;
+        const componentFactory = editor.ui.componentFactory;
+        const t = editor.t;
 
-		componentFactory.add( 'ckfinder', locale => {
-			const command = editor.commands.get( 'ckfinder' );
+        componentFactory.add('ckfinder', locale => {
+            const command = editor.commands.get('ckfinder');
 
-			const button = new ButtonView( locale );
+            const button = new ButtonView(locale);
 
-			button.set( {
-				label: t( 'Insert image or file' ),
-				icon: browseFilesIcon,
-				tooltip: true
-			} );
+            button.set({
+                label: t('Insert image or file'),
+                icon: browseFilesIcon,
+                tooltip: true,
+            });
 
-			button.bind( 'isEnabled' ).to( command );
+            button.bind('isEnabled').to(command);
 
-			button.on( 'execute', () => {
-				editor.execute( 'ckfinder' );
-				editor.editing.view.focus();
-			} );
+            button.on('execute', () => {
+                editor.execute('ckfinder');
+                editor.editing.view.focus();
+            });
 
-			return button;
-		} );
-	}
+            return button;
+        });
+    }
 }

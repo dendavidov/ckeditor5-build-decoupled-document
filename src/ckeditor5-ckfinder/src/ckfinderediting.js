@@ -18,26 +18,26 @@ import CKFinderCommand from './ckfindercommand';
  * @extends module:core/plugin~Plugin
  */
 export default class CKFinderEditing extends Plugin {
-	/**
-	 * @inheritDoc
-	 */
-	static get pluginName() {
-		return 'CKFinderEditing';
-	}
+    /**
+     * @inheritDoc
+     */
+    static get pluginName() {
+        return 'CKFinderEditing';
+    }
 
-	/**
-	 * @inheritDoc
-	 */
-	static get requires() {
-		return [ Notification ];
-	}
+    /**
+     * @inheritDoc
+     */
+    static get requires() {
+        return [Notification];
+    }
 
-	/**
-	 * @inheritDoc
-	 */
-	init() {
-		const editor = this.editor;
+    /**
+     * @inheritDoc
+     */
+    init() {
+        const editor = this.editor;
 
-		editor.commands.add( 'ckfinder', new CKFinderCommand( editor ) );
-	}
+        editor.commands.add('ckfinder', new CKFinderCommand(editor));
+    }
 }

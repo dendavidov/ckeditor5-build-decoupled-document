@@ -94,6 +94,11 @@ export function modelToViewAttributeConverter( attributeKey ) {
 	}
 }
 
+function hashCode(str) {
+	return str.split('').reduce((prevHash, currVal) =>
+		(((prevHash << 5) - prevHash) + currVal.charCodeAt(0))|0, 0);
+}
+
 export default class VideoUploadButton extends Plugin {
 	init() {
 		const editor = this.editor;
@@ -144,27 +149,39 @@ export default class VideoUploadButton extends Plugin {
 				tooltip: true
 			} );
 
-			const { uploadUrl, headers } = editor.config.get( 'ckfinder' );
+			const { downloadUrl, uploadUrl, headers, onError, onStart, onSuccess } = editor.config.get( 'ckfinder' );
 
 			const cb = files => {
-				const formData = new FormData();
+				onStart();
 
 				if ( !files[ 0 ] ) {
 					return;
 				}
-				formData.append('upload', new File(files, files[0].name));
 
-				const xhr = new XMLHttpRequest();
-				xhr.open( 'POST', uploadUrl );
-				Object.entries( headers ).forEach( ( [ key, value ] ) => {
-					xhr.setRequestHeader( key, value );
-				} );
+				const { name, size, lastModified, type} = files[0];
 
-				xhr.onload = function( event ) {
-					const response = JSON.parse( event.target.responseText );
-					editor.execute( 'videoInsert', { source: response.url, controls: true } );
-				};
-				xhr.send( formData );
+				const key = `${hashCode([name, size, lastModified, type].join('-'))}-${name}`;
+
+				fetch(
+					uploadUrl,
+					{
+						body: JSON.stringify({ key }),
+						headers: {
+							'Content-Type': 'application/json',
+							...headers,
+						},
+						method: 'POST',
+					}
+				)
+					.then( res => res.json() )
+					.then( data => data.data )
+					.then(url => fetch(url, {
+						method: 'PUT',
+						body: files[0],
+					} ) ).then( () => {
+						editor.execute( 'videoInsert', { source: `${downloadUrl}/${key}`, controls: true } );
+					    onSuccess();
+					} ).catch( error => onError( error ) );
 			};
 
 			this.inp = window.document.createElement('input');

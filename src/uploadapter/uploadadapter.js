@@ -44,16 +44,27 @@ export default class CKFinderUploadAdapter extends Plugin {
 	 * @inheritDoc
 	 */
 	init() {
-		const url = this.editor.config.get( 'ckfinder.uploadUrl' );
+		const uploadUrl = this.editor.config.get( 'ckfinder.uploadUrl' );
 		const headers = this.editor.config.get( 'ckfinder.headers' );
+		const downloadUrl = this.editor.config.get( 'ckfinder.downloadUrl' );
+		const onError = this.editor.config.get( 'ckfinder.onError' );
+		const onStart = this.editor.config.get( 'ckfinder.onStart' );
+		const onSuccess = this.editor.config.get( 'ckfinder.onSuccess' );
 
-		if ( !url ) {
+		if ( !uploadUrl ) {
 			return;
 		}
 
 		// Register CKFinderAdapter
-		this.editor.plugins.get( FileRepository ).createUploadAdapter = loader => new UploadAdapter( loader, url, this.editor.t, headers );
+		this.editor.plugins.get( FileRepository ).createUploadAdapter = loader => new UploadAdapter( {
+			loader, uploadUrl, t: this.editor.t, headers, downloadUrl, onError, onStart, onSuccess
+		} );
 	}
+}
+
+function hashCode( str ) {
+	return str.split('').reduce((prevHash, currVal) =>
+		(((prevHash << 5) - prevHash) + currVal.charCodeAt(0))|0, 0);
 }
 
 /**
@@ -70,7 +81,7 @@ class UploadAdapter {
 	 * @param {String} url
 	 * @param {module:utils/locale~Locale#t} t
 	 */
-	constructor( loader, url, t, headers ) {
+	constructor( {loader, downloadUrl, uploadUrl, t, headers, onError, onStart, onSuccess } ) {
 		/**
 		 * FileLoader instance to use during the upload.
 		 *
@@ -83,7 +94,9 @@ class UploadAdapter {
 		 *
 		 * @member {String} #url
 		 */
-		this.url = url;
+		this.url = null;
+		this.downloadUrl = downloadUrl;
+		this.uploadUrl = uploadUrl;
 
 		/**
 		 * Locale translation method.
@@ -92,6 +105,9 @@ class UploadAdapter {
 		 */
 		this.t = t;
 		this.headers = headers;
+		this.onError = onError;
+		this.onStart = onStart;
+		this.onSuccess = onSuccess;
 	}
 
 	/**
@@ -101,12 +117,39 @@ class UploadAdapter {
 	 * @returns {Promise.<Object>}
 	 */
 	upload() {
+
+
 		return this.loader.file.then( file => {
-			return new Promise( ( resolve, reject ) => {
-				this._initRequest();
-				this._initListeners( resolve, reject, file );
-				this._sendRequest( file );
-			} );
+			const { name, size, lastModified, type} = file;
+
+			const key = `${hashCode([name, size, lastModified, type].join('-'))}-${name}`;
+
+			return fetch(
+				this.uploadUrl,
+				{
+					body: JSON.stringify({ key }),
+					headers: {
+						'Content-Type': 'application/json',
+						...this.headers,
+					},
+					method: 'POST',
+				}
+			)
+				.then( res => res.json() )
+				.then( data => {
+					return fetch(data.data, {
+						method: 'PUT',
+						body: file,
+					});
+				} )
+				.then( () => {
+					return { default: `${this.downloadUrl}/${key}`}
+
+
+					} )
+
+
+
 		} );
 	}
 
@@ -129,11 +172,7 @@ class UploadAdapter {
 	_initRequest() {
 		const xhr = this.xhr = new XMLHttpRequest();
 
-		xhr.open( 'POST', this.url, true );
-		Object.entries(this.headers).forEach(([key, value]) => {
-			xhr.setRequestHeader(key, value);
-		});
-
+		xhr.open( 'PUT', this.url, true );
 
 		xhr.responseType = 'json';
 	}
@@ -146,7 +185,7 @@ class UploadAdapter {
 	 * @param {Function} reject Callback function to be called when the request cannot be completed.
 	 * @param {File} file File instance to be uploaded.
 	 */
-	_initListeners( resolve, reject, file ) {
+	_initListeners( resolve, reject, file, key ) {
 		const xhr = this.xhr;
 		const loader = this.loader;
 		const t = this.t;
@@ -155,14 +194,14 @@ class UploadAdapter {
 		xhr.addEventListener( 'error', () => reject( genericError ) );
 		xhr.addEventListener( 'abort', () => reject() );
 		xhr.addEventListener( 'load', () => {
-			const response = xhr.response;
+			const status = xhr.status;
 
-			if ( !response || !response.uploaded ) {
-				return reject( response && response.error && response.error.message ? response.error.message : genericError );
+			if ( status !== 200 ) {
+				return reject( genericError );
 			}
 
 			resolve( {
-				default: response.url
+				default: `${ this.downloadUrl }/${ key }`
 			} );
 		} );
 

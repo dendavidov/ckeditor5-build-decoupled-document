@@ -35,8 +35,6 @@ import { findOptimalInsertionPosition } from '@ckeditor/ckeditor5-widget/src/uti
 
 
 export function insertVideo( writer, model, attributes = {} ) {
-	console.log('here',  writer, model, attributes);
-
 	const videoElement = writer.createElement( 'video', attributes );
 
 	const insertAtSelection = findOptimalInsertionPosition( model.document.selection, model );

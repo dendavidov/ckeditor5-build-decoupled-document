@@ -42,7 +42,6 @@ export default class VideoResize extends Plugin {
 		const editor = this.editor;
 		const command = new VideoResizeCommand( editor );
 
-		this._registerSchema();
 		this._registerConverters();
 
 		editor.commands.add( 'videoResize', command );
@@ -53,7 +52,7 @@ export default class VideoResize extends Plugin {
 			const resizer = editor.plugins
 				.get( WidgetResize )
 				.attachTo( {
-					unit: editor.config.get( 'video.resizeUnit' ) || '%',
+					unit: editor.config.get( 'video.resizeUnit' ) || 'px',
 
 					modelElement: data.item,
 					viewElement: widget,
@@ -89,14 +88,14 @@ export default class VideoResize extends Plugin {
 		}, { priority: 'low' } );
 	}
 
-	/**
-	 * @private
-	 */
-	_registerSchema() {
-		this.editor.model.schema.extend( 'video', {
-			allowAttributes: 'width'
-		} );
-	}
+	// /**
+	//  * @private
+	//  */
+	// _registerSchema() {
+	// 	this.editor.model.schema.extend( 'video', {
+	// 		allowAttributes: 'width'
+	// 	} );
+	// }
 
 	/**
 	 * Registers image resize converters.

@@ -113,7 +113,7 @@ export default class VideoUploadButton extends Plugin {
 				isObject: true,
 				isBlock: true,
 				allowWhere: '$block',
-				allowAttributes: [ 'src', 'controls' ],
+				allowAttributes: [ 'src', 'controls' , 'width'],
 			} );
 			conversion.for( 'dataDowncast' ).elementToElement( {
 				model: 'video',

@@ -65,7 +65,6 @@ DecoupledEditor.builtinPlugins = [
 	ImageToolbar,
 	ImageUpload,
 	ImageResize,
-	VideoResize,
 	Link,
 	List,
 	MediaEmbed,
@@ -73,8 +72,9 @@ DecoupledEditor.builtinPlugins = [
 	PasteFromOffice,
 	Table,
 	TableToolbar,
+	VideoUploadButton,
 	ViewSourceButton,
-	VideoUploadButton
+	VideoResize
 ];
 
 // Editor configuration.

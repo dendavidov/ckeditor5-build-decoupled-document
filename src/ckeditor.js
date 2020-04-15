@@ -25,6 +25,7 @@ import ImageCaption from '@ckeditor/ckeditor5-image/src/imagecaption';
 import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
 import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
 import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
+import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
 import Link from '@ckeditor/ckeditor5-link/src/link';
 import List from '@ckeditor/ckeditor5-list/src/list';
 import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
@@ -37,6 +38,7 @@ import VideoUploadButton from './VideoUploadButton';
 
 import UploadAdapter from './uploadapter/uploadadapter';
 import CKFinder from './ckeditor5-ckfinder/src/ckfinder';
+import VideoResize from './videoresize';
 
 export default class DecoupledEditor extends DecoupledEditorBase {}
 
@@ -62,6 +64,8 @@ DecoupledEditor.builtinPlugins = [
 	ImageStyle,
 	ImageToolbar,
 	ImageUpload,
+	ImageResize,
+	VideoResize,
 	Link,
 	List,
 	MediaEmbed,
@@ -109,9 +113,12 @@ DecoupledEditor.defaultConfig = {
 	image: {
 		styles: [
 			'full',
+			'side',
 			'alignLeft',
+			'alignCenter',
 			'alignRight'
 		],
+		resizeUnit: 'px',
 		toolbar: [
 			'imageStyle:alignLeft',
 			'imageStyle:full',

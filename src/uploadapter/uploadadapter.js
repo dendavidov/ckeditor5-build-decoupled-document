@@ -45,15 +45,15 @@ export default class CKFinderUploadAdapter extends Plugin {
 	 */
     init() {
         const {
-            uploadUrl,
-            getHeaders,
+            uploadFile,
             downloadUrl,
             onError,
             onStart,
             onSuccess,
         } = this.editor.config.get('ckfinder');
 
-        if (!uploadUrl) {
+        if (typeof uploadFile !== 'function') {
+            console.error('uploadFile is not a function');
             return;
         }
 
@@ -61,9 +61,8 @@ export default class CKFinderUploadAdapter extends Plugin {
         this.editor.plugins.get(FileRepository).createUploadAdapter = loader =>
             new UploadAdapter({
                 loader,
-                uploadUrl,
                 t: this.editor.t,
-                getHeaders,
+                uploadFile,
                 downloadUrl,
                 onError,
                 onStart,
@@ -99,9 +98,8 @@ class UploadAdapter {
     constructor({
         loader,
         downloadUrl,
-        uploadUrl,
         t,
-        getHeaders,
+        uploadFile,
         onError,
         onStart,
         onSuccess,
@@ -120,7 +118,7 @@ class UploadAdapter {
          */
         this.url = null;
         this.downloadUrl = downloadUrl;
-        this.uploadUrl = uploadUrl;
+        this.uploadFile = uploadFile;
 
         /**
          * Locale translation method.
@@ -128,7 +126,6 @@ class UploadAdapter {
          * @member {module:utils/locale~Locale#t} #t
          */
         this.t = t;
-        this.getHeaders = getHeaders;
         this.onError = onError;
         this.onStart = onStart;
         this.onSuccess = onSuccess;
@@ -148,18 +145,8 @@ class UploadAdapter {
                 [name, size, lastModified, type].join('-'),
             )}-${name}`;
 
-            // eslint-disable-next-line no-undef
-            return fetch(this.uploadUrl, {
-                body: JSON.stringify({ key }),
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getHeaders(),
-                },
-                method: 'POST',
-            })
-                .then(res => res.json())
+            return this.uploadFile(key)
                 .then(data => {
-                    // eslint-disable-next-line no-undef
                     return fetch(data.data, {
                         method: 'PUT',
                         body: file,

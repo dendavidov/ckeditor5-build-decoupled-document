@@ -186,8 +186,7 @@ export default class VideoUploadButton extends Plugin {
 
             const {
                 downloadUrl,
-                uploadUrl,
-                getHeaders,
+                uploadFile,
                 onError,
                 onStart,
                 onSuccess,
@@ -206,15 +205,7 @@ export default class VideoUploadButton extends Plugin {
                     [name, size, lastModified, type].join('-'),
                 )}-${name}`;
 
-                fetch(uploadUrl, {
-                    body: JSON.stringify({ key }),
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...getHeaders(),
-                    },
-                    method: 'POST',
-                })
-                    .then(res => res.json())
+                uploadFile(key)
                     .then(data => data.data)
                     .then(url =>
                         fetch(url, {

@@ -74,6 +74,7 @@
   },
   "scripts": {
     "build": "webpack --mode production",
+    "deploy": "npm run build && git add . && git commit -m \"Update\" && git push --set-upstream origin && git rev-parse HEAD",
     "lint": "eslint --quiet '**/*.js'",
     "preversion": "npm run build; if [ -n \"$(git status src/ckeditor.js build/ --porcelain)\" ]; then git add -u src/ckeditor.js build/ && git commit -m 'Internal: Build.'; fi"
   },
@@ -92,6 +93,7 @@
     }
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-ui": "^15.0.0"
+    "@ckeditor/ckeditor5-ui": "^15.0.0",
+    "hexsorter": "^1.5.0"
   }
 }

@@ -8,6 +8,8 @@ import DecoupledEditorBase from '@ckeditor/ckeditor5-editor-decoupled/src/decoup
 
 import Essentials from '@ckeditor/ckeditor5-essentials/src/essentials';
 import Alignment from '@ckeditor/ckeditor5-alignment/src/alignment';
+import FontColor from '@ckeditor/ckeditor5-font/src/fontcolor';
+import FontBackgroundColor from '@ckeditor/ckeditor5-font/src/fontbackgroundcolor';
 import FontSize from '@ckeditor/ckeditor5-font/src/fontsize';
 import FontFamily from '@ckeditor/ckeditor5-font/src/fontfamily';
 import Highlight from '@ckeditor/ckeditor5-highlight/src/highlight';
@@ -39,6 +41,7 @@ import VideoUploadButton from './VideoUploadButton';
 import UploadAdapter from './uploadapter/uploadadapter';
 import CKFinder from './ckeditor5-ckfinder/src/ckfinder';
 import VideoResize from './videoresize';
+import { colorsSettings } from './colors';
 
 export default class DecoupledEditor extends DecoupledEditorBase {}
 
@@ -48,6 +51,8 @@ DecoupledEditor.builtinPlugins = [
 	Alignment,
 	FontSize,
 	FontFamily,
+	FontColor,
+	FontBackgroundColor,
 	Highlight,
 	UploadAdapter,
 	Autoformat,
@@ -90,7 +95,8 @@ DecoupledEditor.defaultConfig = {
 			'italic',
 			'underline',
 			'strikethrough',
-			'highlight',
+			'fontColor',
+			'fontBackgroundColor',
 			'|',
 			'alignment',
 			'|',
@@ -145,6 +151,14 @@ DecoupledEditor.defaultConfig = {
 				}
 			}
 		}
+	},
+	fontColor: {
+		colors: colorsSettings,
+		columns: 17,
+	},
+	fontBackgroundColor: {
+		colors: colorsSettings,
+		columns: 17,
 	},
 	// This value must be kept in sync with the language defined in webpack.config.js.
 	language: 'en'

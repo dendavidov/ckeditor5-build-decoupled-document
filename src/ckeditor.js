@@ -20,14 +20,14 @@ import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic';
 import Strikethrough from '@ckeditor/ckeditor5-basic-styles/src/strikethrough';
 import Underline from '@ckeditor/ckeditor5-basic-styles/src/underline';
 import BlockQuote from '@ckeditor/ckeditor5-block-quote/src/blockquote';
-import EasyImage from '@ckeditor/ckeditor5-easy-image/src/easyimage';
+import EasyImage from './ckeditor5-easy-image/src/easyimage';
 import Heading from '@ckeditor/ckeditor5-heading/src/heading';
-import Image from '@ckeditor/ckeditor5-image/src/image';
-import ImageCaption from '@ckeditor/ckeditor5-image/src/imagecaption';
-import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
-import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
-import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
-import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
+import Image from './ckeditor5-image/src/image';
+import ImageCaption from './ckeditor5-image/src/imagecaption';
+import ImageStyle from './ckeditor5-image/src/imagestyle';
+import ImageToolbar from './ckeditor5-image/src/imagetoolbar';
+import ImageUpload from './ckeditor5-image/src/imageupload';
+import ImageResize from './ckeditor5-image/src/imageresize';
 import Link from '@ckeditor/ckeditor5-link/src/link';
 import List from '@ckeditor/ckeditor5-list/src/list';
 import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
@@ -125,6 +125,8 @@ DecoupledEditor.defaultConfig = {
             'imageStyle:alignRight',
             '|',
             'imageTextAlternative',
+            '|',
+            'lightBox',
         ],
     },
     table: {
